@@ -19,6 +19,19 @@ const App = () => {
   */
   const [currentAccount, setCurrentAccount] = useState("");
 
+  const checkIfCorrectNetwork = async () => {
+    const {ethereum} = window;
+    if (ethereum) {
+      const rinkebyChainId = '0x4';
+      const chainId = await ethereum.request({method: 'eth_chainId'});
+      console.log('Connected to chain ', chainId);
+      if (chainId !== rinkebyChainId)
+        alert("You are not connected to the Rinkeby Test Network!");
+    } else {
+      console.error('Cannot find Ethereum object!!!');
+    }
+  }
+
   const checkIfWalletIsConnected = async () => {
     /*
     * First make sure we have access to window.ethereum
@@ -147,6 +160,7 @@ const App = () => {
 
   useEffect(() => {
     checkIfWalletIsConnected();
+    checkIfCorrectNetwork();
     getNumberOfMintedNFTs();
   }, []);
 
