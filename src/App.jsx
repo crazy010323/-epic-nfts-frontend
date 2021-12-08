@@ -4,16 +4,20 @@ import myEpicNFT from './utils/MyEpicNft.json';
 import './styles/App.css';
 import twitterLogo from './assets/twitter-logo.svg';
 
+import LoadingMask from "react-loadingmask";
+import "react-loadingmask/dist/react-loadingmask.css";
+
 // Constants
-const TWITTER_HANDLE = '_buildspace';
+const TWITTER_HANDLE = 'crazy010323';
 const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
-const OPENSEA_LINK = '';
+const OPENSEA_LINK = 'https://testnets.opensea.io/collection/squarenft-dmihzahvtc';
 const TOTAL_MINT_COUNT = 50;
 
 const App = () => {
 
   const CONTRACT_ADDRESS = "0x33f1AF8a7B9980E8ce9d43a0Eb1d5668022c5F07";
   const [mintedNFTs, setMintedNFTs] = useState(0);
+  const [mining, setMining] = useState(false);
   /*
   * Just a state variable we use to store our user's public wallet. Don't forget to import useState.
   */
@@ -95,6 +99,7 @@ const App = () => {
         const connectedContract = new ethers.Contract(CONTRACT_ADDRESS, myEpicNFT.abi, signer);
 
         console.log('Going to pop up wallet now to pay for gas fees');
+        setMining(prev => (true));
         let nftTxn = await connectedContract.makeAnEpicNFT();
         console.log("Mining...please wait.")
         await nftTxn.wait();
@@ -123,6 +128,7 @@ const App = () => {
     connectedContract.on("newEpicNftMinted", (from, tokenId) => {
       console.log(from, tokenId.toNumber(), mintedNFTs);
       setMintedNFTs(prevValue => (prevValue + 1));
+      setMining(prev => (false));
       alert(`Hey there! We've minted your NFT and sent it to your wallet. It may be blank right now. It can take a max of 10 min to show up on OpenSea. Here's the link: https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}/${tokenId.toNumber()}`)
     });
   }
@@ -152,8 +158,8 @@ const App = () => {
   );
 
   const renderMintUi = () => (
-    <button onClick={askContractToMintNft} className="cta-button connect-wallet-button">
-      Mint NFT
+    <button onClick={askContractToMintNft} className="cta-button connect-wallet-button" disabled={mining}>
+      {!mining ? "Mint NFT" : "Minting..."}
       <div>(You have minted {mintedNFTs} NFT{mintedNFTs != 1 ? 's' : ''} so far!!!)</div>
     </button>
   );
@@ -177,6 +183,12 @@ const App = () => {
           </p>
           {currentAccount === "" ? renderNotConnectedContainer() : renderMintUi()}
         </div>
+        <a
+          className="footer-text"
+          href={OPENSEA_LINK}
+          target="_blank"
+          rel="noreferrer"
+        >🌊 View Collection on OpenSea</a>
         <div className="footer-container">
           <img alt="Twitter Logo" className="twitter-logo" src={twitterLogo} />
           <a
